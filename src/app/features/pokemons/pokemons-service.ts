@@ -4,6 +4,7 @@ import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { PaginatedResponseDto } from '../../core/api/paginated-reponse-dto';
 import { NotificationService } from '../../core/notification/notification-service';
 import { GetAllPokemonDto, mapFromGetAllPokemonDtoArrayToPokemonArray } from '../../core/api/pokemons/dtos/get-all-pokemon-dto';
+import { GetPokemonDetailsDto, mapFromGetPokemonDetailsDtoToPokemon } from '../../core/api/pokemons/dtos/get-pokemon-details-dto';
 import { Pokemon } from '../../core/class/pokemon';
 
 @Injectable({
@@ -42,4 +43,29 @@ export class PokemonsService {
   });
 
   public isLoading = this.pokemonResource.isLoading;
+
+  /**
+   * Récupère les détails d'un pokémon par son nom
+   */
+  public getPokemonDetailsByName(name: string): Promise<Pokemon> {
+    return new Promise((resolve, reject) => {
+      const resource = httpResource<GetPokemonDetailsDto>(
+        () => this.pokemonApiRoutes.getByNameUrl(name)
+      );
+
+      effect(() => {
+        const value = resource.value();
+        const error = resource.error() as HttpErrorResponse | null;
+
+        if (value) {
+          const pokemon = mapFromGetPokemonDetailsDtoToPokemon(value);
+          resolve(pokemon);
+        } else if (error) {
+          const detail = error.message ?? 'Une erreur est survenue.';
+          this.notificationService.error('Erreur lors de la récupération du pokémon', detail);
+          reject(error);
+        }
+      });
+    });
+  }
 }

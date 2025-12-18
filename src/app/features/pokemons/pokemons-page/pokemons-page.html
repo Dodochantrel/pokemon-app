@@ -1,5 +1,6 @@
 <h1>Liste des Pokémons</h1>
-@for(pokemon of pokemonsService.pokemons(); track $index) {
-    {{ pokemon.name }}
-    <app-pokemon-card-component></app-pokemon-card-component>
-}
+<div class="pokemon-grid">
+  @for(pokemon of pokemonsService.pokemons(); track pokemon.name) {
+    <app-pokemon-card-component [pokemon]="pokemon"></app-pokemon-card-component>
+  }
+</div>
