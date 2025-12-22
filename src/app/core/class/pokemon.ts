@@ -19,13 +19,10 @@ export class Pokemon {
     }
 
     get imageUrl(): string {
-        return this.sprite ?? this.getDefaultImageUrl();
+        return this.getDefaultImageUrl();
     }
 
     private getDefaultImageUrl(): string {
-        if (this.id) {
-            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${this.id}.png`;
-        }
         // Extract ID from URL if available
         const matches = this.url.match(/\/pokemon\/(\d+)\//);
         if (matches && matches[1]) {

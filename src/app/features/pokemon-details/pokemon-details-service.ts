@@ -1,35 +1,31 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { PokemonsRoutes } from '../../core/api/pokemons/routes/pokemons-api';
-import { HttpErrorResponse, httpResource } from '@angular/common/http';
-import { PaginatedResponseDto } from '../../core/api/paginated-reponse-dto';
 import { NotificationService } from '../../core/notification/notification-service';
-import { GetAllPokemonDto, mapFromGetAllPokemonDtoArrayToPokemonArray } from '../../core/api/pokemons/dtos/get-all-pokemon-dto';
 import { Pokemon } from '../../core/class/pokemon';
+import { GetPokemonDetailsDto, mapFromGetPokemonDetailsDtoToPokemon } from '../../core/api/pokemons/dtos/get-pokemon-details-dto';
+import { HttpErrorResponse, httpResource } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PokemonsService {
+export class PokemonDetailsService {
   private pokemonApiRoutes: PokemonsRoutes = new PokemonsRoutes();
   private notificationService: NotificationService = inject(NotificationService);
 
-  private readonly pokemonResource = httpResource<PaginatedResponseDto<GetAllPokemonDto>>(
+  private readonly pokemonResource = httpResource<GetPokemonDetailsDto>(
     () =>
-      this.pokemonApiRoutes.getAllUrl(
-        this.limit(), this.offset()
-      )
+      this.pokemonApiRoutes.getByNameUrl(this.name())
   );
 
-  public pokemons = signal<Pokemon[]>([]);
-  public offset = signal(0);
-  public limit = signal(20);
+  public name = signal<string>('');  
+  public pokemon = signal<Pokemon | null>(null);
 
   private updatePokemonsOnValue = effect(() => {
     const resource = this.pokemonResource.value();
     if (resource) {
-      this.pokemons.set(mapFromGetAllPokemonDtoArrayToPokemonArray(resource.results));
+      this.pokemon.set(mapFromGetPokemonDetailsDtoToPokemon(resource));
     } else {
-      this.pokemons.set([]);
+      this.pokemon.set(null);
     }
   });
 
@@ -37,7 +33,7 @@ export class PokemonsService {
     const err = this.pokemonResource.error() as HttpErrorResponse | null;
     if (err) {
       const detail = err.message ?? 'Une erreur est survenue.';
-      this.notificationService.error('Erreur lors de la récupération des pokémons', detail);
+      this.notificationService.error(`Erreur lors de la récupération de ${this.name()}`, detail);
     }
   });
 

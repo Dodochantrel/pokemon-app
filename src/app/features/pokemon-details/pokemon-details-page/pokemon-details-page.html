@@ -1,0 +1,9 @@
+@if(pokemonDetailsService.pokemon()) {
+<div class="flex">
+  <img class="mt-4" [src]="pokemonDetailsService.pokemon()!.imageUrl" [alt]="pokemonDetailsService.pokemon()!.name" />
+</div>
+} @else if (pokemonDetailsService.isLoading()) {
+    <h1>Pokemon introuvable</h1>
+} @else {
+    <h1>Chargement...</h1>
+}
